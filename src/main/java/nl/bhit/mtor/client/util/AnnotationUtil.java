@@ -1,4 +1,4 @@
-package nl.bhit.mtor.util;
+package nl.bhit.mtor.client.util;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
