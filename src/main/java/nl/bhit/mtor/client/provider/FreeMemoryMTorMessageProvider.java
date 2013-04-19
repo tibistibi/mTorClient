@@ -2,8 +2,8 @@ package nl.bhit.mtor.client.provider;
 
 import nl.bhit.mtor.client.annotation.MTorMessage;
 import nl.bhit.mtor.client.annotation.MTorMessageProvider;
-import nl.bhit.mtor.model.Status;
-import nl.bhit.mtor.model.soap.SoapMessage;
+import nl.bhit.mtor.client.model.ClientMessage;
+import nl.bhit.mtor.client.model.Status;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -28,8 +28,8 @@ public class FreeMemoryMTorMessageProvider {
      * @return
      */
     @MTorMessage
-    public static SoapMessage getVirtualMemoryMessage() {
-        SoapMessage message = new SoapMessage();
+    public static ClientMessage getVirtualMemoryMessage() {
+    	ClientMessage message = new ClientMessage();
         final long free = Runtime.getRuntime().freeMemory();
         log.trace("free memory is: " + free);
         if (free < ERROR_LIMIT) {
@@ -43,7 +43,7 @@ public class FreeMemoryMTorMessageProvider {
         return null;
     }
 
-    protected static SoapMessage createMessage(SoapMessage message, String errorMessage, Status status) {
+    protected static ClientMessage createMessage(ClientMessage message, String errorMessage, Status status) {
         log.warn(errorMessage);
         message.setContent(errorMessage);
         message.setStatus(status);

@@ -2,18 +2,16 @@ package nl.bhit.mtor.client;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.rmi.RemoteException;
 import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
 
 import nl.bhit.mtor.client.annotation.MTorMessage;
 import nl.bhit.mtor.client.annotation.MTorMessageProvider;
-import nl.bhit.mtor.client.wsdl.MessageServiceStub;
-import nl.bhit.mtor.client.wsdl.MessageServiceStub.Status;
-import nl.bhit.mtor.util.AnnotationUtil;
+import nl.bhit.mtor.client.util.AnnotationUtil;
+import nl.bhit.mtor.client.model.ClientMessage;
+import nl.bhit.mtor.client.model.Status;
 
-import org.apache.axis2.AxisFault;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -108,7 +106,7 @@ public class MessageServiceSender {
 
     protected void sendMessageForThisMehtod(Method method) throws IllegalAccessException, InvocationTargetException {
         log.trace("will invoke method to retrieve a soapMessage: " + method);
-        nl.bhit.mtor.model.soap.SoapMessage soapMessage = (nl.bhit.mtor.model.soap.SoapMessage) method.invoke(null,
+        ClientMessage soapMessage = (ClientMessage) method.invoke(null,
                 (Object[]) null);
         if (soapMessage == null) {
             log.trace("soapMessage result is null, no sending needed.");
@@ -117,57 +115,18 @@ public class MessageServiceSender {
         }
     }
 
-    protected void sendMessage(nl.bhit.mtor.model.soap.SoapMessage soapMessage) {
+    protected void sendMessage(ClientMessage soapMessage) {
         log.debug("trying to add a message to the soap service: " + soapMessage);
-        MessageServiceStub stub = createMessageServiceStub();
-        MessageServiceStub.SaveSoapMessageE req = addSoapMessageToStub(soapMessage);
-        sendSoapMessage(stub, req);
-    }
-
-    protected void sendSoapMessage(MessageServiceStub stub, MessageServiceStub.SaveSoapMessageE req) {
-        try {
-            log.trace("start sending");
-            MessageServiceStub.SaveSoapMessageResponseE result = stub.saveSoapMessage(req);
-            log.trace("result:" + result);
-        } catch (RemoteException e) {
-            log.error("could not send message to mTor!", e);
-        }
-    }
-
-    protected MessageServiceStub.SaveSoapMessageE addSoapMessageToStub(nl.bhit.mtor.model.soap.SoapMessage soapMessage) {
-        MessageServiceStub.SaveSoapMessageE req = new MessageServiceStub.SaveSoapMessageE();
-        MessageServiceStub.SaveSoapMessage req1 = new MessageServiceStub.SaveSoapMessage();
-        req1.setArg0(createWsdlMessage(soapMessage));
-        req.setSaveSoapMessage(req1);
-        return req;
-    }
-
-    protected nl.bhit.mtor.client.wsdl.MessageServiceStub.SoapMessage createWsdlMessage(
-            nl.bhit.mtor.model.soap.SoapMessage soapMessage) {
-        nl.bhit.mtor.client.wsdl.MessageServiceStub.SoapMessage wsdlMessage = new nl.bhit.mtor.client.wsdl.MessageServiceStub.SoapMessage();
-        wsdlMessage.setContent(soapMessage.getContent());
-        wsdlMessage.setStatus(getStatus(soapMessage.getStatus()));
-        wsdlMessage.setProjectId(getPorjectId());
-        return wsdlMessage;
-    }
-
-    protected MessageServiceStub createMessageServiceStub() {
-        MessageServiceStub stub = null;
-        try {
-            String connectionUrl = getConnectionUrl();
-            log.debug("connecting to: " + connectionUrl);
-            stub = new MessageServiceStub(connectionUrl);
-        } catch (AxisFault e) {
-            log.error("could not create messageServiceStub to send message to mTor!", e);
-        }
-        return stub;
+        //MessageServiceStub stub = createMessageServiceStub();
+        //MessageServiceStub.SaveSoapMessageE req = addSoapMessageToStub(soapMessage);
+        //sendSoapMessage(stub, req);
     }
 
     protected String getConnectionUrl() {
         return properties.getProperty(M_TOR_SERVER_URL);
     }
 
-    private static Status getStatus(nl.bhit.mtor.model.Status status) {
+    private static Status getStatus(nl.bhit.mtor.client.model.Status status) {
         Status msgStatus;
 
         switch (status) {

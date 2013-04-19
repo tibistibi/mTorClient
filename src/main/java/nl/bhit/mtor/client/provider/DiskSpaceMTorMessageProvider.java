@@ -4,8 +4,8 @@ import java.io.File;
 
 import nl.bhit.mtor.client.annotation.MTorMessage;
 import nl.bhit.mtor.client.annotation.MTorMessageProvider;
-import nl.bhit.mtor.model.Status;
-import nl.bhit.mtor.model.soap.SoapMessage;
+import nl.bhit.mtor.client.model.ClientMessage;
+import nl.bhit.mtor.client.model.Status;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -30,8 +30,8 @@ public class DiskSpaceMTorMessageProvider {
      * @return
      */
     @MTorMessage
-    public static SoapMessage getDiskSpaceMessage() {
-        SoapMessage message = new SoapMessage();
+    public static ClientMessage getDiskSpaceMessage() {
+    	ClientMessage message = new ClientMessage();
         long free = getFreeDiskSpace();
         if (free < errorLimit) {
             return createMessage(message, "The hard drive is almost full!", Status.ERROR);
@@ -42,7 +42,7 @@ public class DiskSpaceMTorMessageProvider {
         return null;
     }
 
-    protected static SoapMessage createMessage(SoapMessage message, String errorMessage, Status status) {
+    protected static ClientMessage createMessage(ClientMessage message, String errorMessage, Status status) {
         log.warn(errorMessage);
         message.setContent(errorMessage);
         message.setStatus(status);

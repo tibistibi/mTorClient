@@ -1,4 +1,4 @@
-package nl.bhit.mtor.model;
+package nl.bhit.mtor.client.model;
 
 import java.util.Arrays;
 import java.util.List;
