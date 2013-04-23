@@ -14,11 +14,11 @@ public class FreeMemoryMTorMessageProvider {
 	
     private static final Log log = LogFactory.getLog(FreeMemoryMTorMessageProvider.class);
     
-    public static final long WARN_LIMIT = 150 /*MB*/ * 1024 /*KB x MB*/ * 1024 /*Byte x KB*/;
-    public static final long ERROR_LIMIT = 50 /*MB*/ * 1024 /*KB x MB*/ * 1024 /*Byte x KB*/;
+    public static long warnLimit = 150 /*MB*/ * 1024 /*KB x MB*/ * 1024 /*Byte x KB*/;
+    public static long errorLimit = 50 /*MB*/ * 1024 /*KB x MB*/ * 1024 /*Byte x KB*/;
     
-    private static final String ERROR_MSG = "The free memory is less then " + ERROR_LIMIT + "!";
-    private static final String WARN_MSG = "The free memory is less then " + WARN_LIMIT + "! It is running low.";
+    private static final String ERROR_MSG = "The free memory is less then " + errorLimit + "!";
+    private static final String WARN_MSG = "The free memory is less then " + warnLimit + "! It is running low.";
 
 
     /**
@@ -32,11 +32,11 @@ public class FreeMemoryMTorMessageProvider {
     	ClientMessage message = new ClientMessage();
         final long free = Runtime.getRuntime().freeMemory();
         log.trace("free memory is: " + free);
-        if (free < ERROR_LIMIT) {
+        if (free < errorLimit) {
             log.trace(ERROR_MSG);
             return createMessage(message, ERROR_MSG, Status.ERROR);
         }
-        if (free < WARN_LIMIT) {
+        if (free < warnLimit) {
             log.trace(WARN_MSG);
             return createMessage(message, WARN_MSG, Status.WARN);
         }
@@ -49,5 +49,21 @@ public class FreeMemoryMTorMessageProvider {
         message.setStatus(status);
         return message;
     }
+
+	public static long getWarnLimit() {
+		return warnLimit;
+	}
+
+	public static void setWarnLimit(long warnLimit) {
+		FreeMemoryMTorMessageProvider.warnLimit = warnLimit;
+	}
+
+	public static long getErrorLimit() {
+		return errorLimit;
+	}
+
+	public static void setErrorLimit(long errorLimit) {
+		FreeMemoryMTorMessageProvider.errorLimit = errorLimit;
+	}
 
 }

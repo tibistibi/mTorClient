@@ -14,7 +14,6 @@ public class DiskSpaceMTorMessageProviderTest extends TestCase {
         File tmp = new File("/");
         long free = tmp.getFreeSpace();
         
-        //Using reflection trick to keep constants final.
         DiskSpaceMTorMessageProvider.setErrorLimit(free - 100);
         DiskSpaceMTorMessageProvider.setWarnLimit(free - 100);
         
