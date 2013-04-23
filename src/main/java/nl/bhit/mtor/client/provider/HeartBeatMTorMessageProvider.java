@@ -13,7 +13,7 @@ import nl.bhit.mtor.client.model.Status;
 public class HeartBeatMTorMessageProvider {
 
     @MTorMessage
-    public static ClientMessage sendIAmAliveMessage() {
+    public static ClientMessage getHeartBeatMessage() {
     	ClientMessage message = new ClientMessage();
         message.setContent("I am alive!");
         message.setStatus(Status.INFO);

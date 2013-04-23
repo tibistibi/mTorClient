@@ -28,7 +28,7 @@ public class FreeMemoryMTorMessageProvider {
      * @return
      */
     @MTorMessage
-    public static ClientMessage getVirtualMemoryMessage() {
+    public static ClientMessage getFreeMemoryMessage() {
     	ClientMessage message = new ClientMessage();
         final long free = Runtime.getRuntime().freeMemory();
         log.trace("free memory is: " + free);

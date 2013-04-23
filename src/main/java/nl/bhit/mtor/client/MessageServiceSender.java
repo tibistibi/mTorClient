@@ -9,13 +9,14 @@ import java.util.Set;
 import nl.bhit.mtor.client.annotation.MTorMessage;
 import nl.bhit.mtor.client.annotation.MTorMessageProvider;
 import nl.bhit.mtor.client.util.AnnotationUtil;
+import nl.bhit.mtor.client.util.RestUtil;
 import nl.bhit.mtor.client.model.ClientMessage;
-import nl.bhit.mtor.client.model.Status;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.web.client.RestClientException;
 
 /**
  * This message Service sender will send all messages it will find. It will look for providers annotated with @MTorMessageProvider
@@ -23,6 +24,8 @@ import org.springframework.beans.factory.config.BeanDefinition;
  * 
  * @MTorMessage.
  * @author tibi
+ * @author jgvanrossum
+ * 
  */
 public class MessageServiceSender {
 
@@ -49,7 +52,7 @@ public class MessageServiceSender {
             properties.load(this.getClass().getResourceAsStream("/" + propertiesFile));
             result = true;
         } catch (Exception e) {
-            log.error("Properties could not be loaded. Make sure the properties file is on the path: "
+            log.warn("Properties could not be loaded. Make sure the properties file is on the path: "
                     + M_TOR_PROPERTIES);
             log.trace("stacktrace for above error:", e);
         }
@@ -67,7 +70,11 @@ public class MessageServiceSender {
 
         for (String basePackage : getBasePackages()) {
             log.trace("sendMessages for base package: " + basePackage);
-            sendMessages(basePackage);
+            try {
+				sendMessages(basePackage);
+			} catch (Exception e) {
+				// Do nothing, errors are suppressed
+			}
         }
     }
 
@@ -85,72 +92,50 @@ public class MessageServiceSender {
         return properties.getProperty(M_TOR_PACKAGES);
     }
 
-    private void sendMessages(String basePackage) {
+    private void sendMessages(String basePackage) throws Exception {
         try {
             final Set<BeanDefinition> candidates = AnnotationUtil.findProviders(MTorMessageProvider.class, basePackage);
             for (BeanDefinition beanDefinition : candidates) {
-                sendMessageForThisProvider(beanDefinition);
+                sendMessageForProvider(beanDefinition);
             }
         } catch (Exception e) {
             log.warn("There is a problem in sending the mTor messages via soap. Monitoring will not work", e);
+            throw e;
         }
     }
 
-    protected void sendMessageForThisProvider(BeanDefinition beanDefinition) throws IllegalAccessException,
-            InvocationTargetException {
+    protected void sendMessageForProvider(BeanDefinition beanDefinition) throws IllegalAccessException,
+            InvocationTargetException, RestClientException, Exception {
         log.debug("found bean: " + beanDefinition);
         for (Method method : AnnotationUtil.findMethods(MTorMessage.class, beanDefinition)) {
-            sendMessageForThisMehtod(method);
+            sendMessageForMethod(method);
         }
     }
 
-    protected void sendMessageForThisMehtod(Method method) throws IllegalAccessException, InvocationTargetException {
-        log.trace("will invoke method to retrieve a soapMessage: " + method);
-        ClientMessage soapMessage = (ClientMessage) method.invoke(null,
+    protected void sendMessageForMethod(Method method) throws IllegalAccessException, InvocationTargetException, RestClientException, Exception {
+        log.trace("will invoke method to retrieve a Message: " + method);
+        ClientMessage clientMessage = (ClientMessage) method.invoke(null,
                 (Object[]) null);
-        if (soapMessage == null) {
-            log.trace("soapMessage result is null, no sending needed.");
+        if (clientMessage == null) {
+            log.trace("Message result is null, no sending needed.");
         } else {
-            sendMessage(soapMessage);
+        	clientMessage.setProjectId(getProjectId());
+        	log.debug("Saving message to the server: " + clientMessage);
+            RestUtil.saveClientMessage(clientMessage, getServerUrl());
         }
     }
 
-    protected void sendMessage(ClientMessage soapMessage) {
-        log.debug("trying to add a message to the soap service: " + soapMessage);
-        //MessageServiceStub stub = createMessageServiceStub();
-        //MessageServiceStub.SaveSoapMessageE req = addSoapMessageToStub(soapMessage);
-        //sendSoapMessage(stub, req);
-    }
-
-    protected String getConnectionUrl() {
+    protected String getServerUrl() {
         return properties.getProperty(M_TOR_SERVER_URL);
     }
 
-    private static Status getStatus(nl.bhit.mtor.client.model.Status status) {
-        Status msgStatus;
-
-        switch (status) {
-            case INFO:
-                msgStatus = Status.INFO;
-                break;
-            case WARN:
-                msgStatus = Status.WARN;
-                break;
-            default:
-                msgStatus = Status.ERROR;
-                break;
-        }
-
-        return msgStatus;
-    }
-
-    protected Long getPorjectId() {
+    protected Long getProjectId() {
         Long projectId = null;
         try {
             String projectIdStr = properties.getProperty(M_TOR_PROJECT_ID);
             projectId = new Long(projectIdStr);
         } catch (Exception e) {
-            log.error("could not read the projectId so message can not be send, no monitoring possible!", e);
+            log.warn("could not read the projectId so message can not be send, no monitoring possible!", e);
         }
         log.debug("using projectId:" + projectId);
         return projectId;

@@ -17,7 +17,7 @@ public class Timer {
         try {
             client.sendMessages();
         } catch (Exception e) {
-            log.error("exception occured: ", e);
+            log.warn("exception occured: ", e);
         }
     }
 }
