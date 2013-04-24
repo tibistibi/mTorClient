@@ -81,8 +81,10 @@ public class MessageServiceSender {
 		Set<String> result = new HashSet<String>();
 		result.add(defaultBasePackage);
 		String[] pieces = StringUtils.split(getBasePackegeFromProperty(), ",");
-		for (int i = 0; i < pieces.length; i++) {
-			result.add(StringUtils.trim(pieces[i]));
+		if (pieces != null) {
+			for (int i = 0; i < pieces.length; i++) {
+				result.add(StringUtils.trim(pieces[i]));
+			}
 		}
 		return result;
 	}
