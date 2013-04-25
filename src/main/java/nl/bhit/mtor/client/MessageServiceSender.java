@@ -13,8 +13,7 @@ import nl.bhit.mtor.client.util.AnnotationUtil;
 import nl.bhit.mtor.client.util.RestUtil;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.web.client.RestClientException;
 
@@ -27,24 +26,25 @@ import org.springframework.web.client.RestClientException;
  * @author jgvanrossum
  */
 public class MessageServiceSender {
+	private static final transient Logger LOG = Logger.getLogger(MessageServiceSender.class);
 
-    private static final String M_TOR_PROJECT_ID = "mTor.project.id";
+	private static final String M_TOR_PROJECT_ID = "mTor.project.id";
     private static final String M_TOR_SERVER_URL = "mTor.server.url";
     private static final String M_TOR_SERVER_USERNAME = "mTor.server.username";
     private static final String M_TOR_SERVER_PASSWORD = "mTor.server.password";
     private static final String M_TOR_PACKAGES = "mTor.packages";
     private static final String M_TOR_PROPERTIES = "mTor.properties";
-    protected final Log log = LogFactory.getLog(MessageServiceSender.class);
+    
     Properties properties;
     private final String defaultBasePackage = "nl.bhit.mtor";
 
 	public MessageServiceSender() {
 		properties = new Properties();
 		if (!loadProperties(M_TOR_PROPERTIES)) {
-			log.debug("Will load default properties.");
+			LOG.debug("Will load default properties.");
 			loadProperties("default." + M_TOR_PROPERTIES);
 		}
-		log.trace("props loaded");
+		LOG.trace("props loaded");
 	}
 
 	protected boolean loadProperties(String propertiesFile) {
@@ -53,8 +53,8 @@ public class MessageServiceSender {
 			properties.load(this.getClass().getResourceAsStream("/" + propertiesFile));
 			result = true;
 		} catch (Exception e) {
-			log.warn("Properties could not be loaded. Make sure the properties file is on the path: " + M_TOR_PROPERTIES);
-			log.trace("stacktrace for above error:", e);
+			LOG.warn("Properties could not be loaded. Make sure the properties file is on the path: " + M_TOR_PROPERTIES);
+			LOG.trace("stacktrace for above error:", e);
 		}
 		return result;
 	}
@@ -66,15 +66,15 @@ public class MessageServiceSender {
 	 * Possible errors will be logged but will not influence the project (will be kept quiet).
 	 */
 	public void sendMessages() {
-		log.trace("start sending message, will search for MTorMessageProvider classes");
+		LOG.trace("start sending message, will search for MTorMessageProvider classes");
 
 		for (String basePackage : getBasePackages()) {
-			log.trace("sendMessages for base package: " + basePackage);
+			LOG.trace("sendMessages for base package: " + basePackage);
 			try {
 				sendMessages(basePackage);
 			} catch (Exception e) {
-				log.warn("there is an exception with sendMessages. The application is probably not monitorred! " + e.getMessage());
-				log.trace("exception with which we do nothing. ", e);
+				LOG.warn("there is an exception with sendMessages. The application is probably not monitorred! " + e.getMessage());
+				LOG.trace("exception with which we do nothing. ", e);
 			}
 		}
 	}
@@ -82,14 +82,16 @@ public class MessageServiceSender {
 	protected Set<String> getBasePackages() {
 		Set<String> result = new HashSet<String>();
 		result.add(defaultBasePackage);
-		String[] pieces = StringUtils.split(getBasePackegeFromProperty(), ",");
-		for (int i = 0; i < pieces.length; i++) {
-			result.add(StringUtils.trim(pieces[i]));
+		String[] pieces = StringUtils.split(getBasePackageFromProperty(), ",");
+		if (pieces != null) {
+			for (int i = 0; i < pieces.length; i++) {
+				result.add(StringUtils.trim(pieces[i]));
+			}
 		}
 		return result;
 	}
 
-	protected String getBasePackegeFromProperty() {
+	protected String getBasePackageFromProperty() {
 		return properties.getProperty(M_TOR_PACKAGES);
 	}
 
@@ -100,31 +102,44 @@ public class MessageServiceSender {
 				sendMessageForProvider(beanDefinition);
 			}
 		} catch (Exception e) {
-			log.warn("There is a problem in sending the mTor messages via soap. Monitoring will not work", e);
+			LOG.warn("There is a problem in sending the mTor messages via soap. Monitoring will not work", e);
 			throw e;
 		}
 	}
 
 	protected void sendMessageForProvider(BeanDefinition beanDefinition) throws IllegalAccessException, InvocationTargetException, RestClientException,
 			Exception {
-		log.debug("found bean: " + beanDefinition);
+		LOG.debug("found bean: " + beanDefinition);
 		for (Method method : AnnotationUtil.findMethods(MTorMessage.class, beanDefinition)) {
 			sendMessageForMethod(method);
 		}
 	}
 
     protected void sendMessageForMethod(Method method) throws IllegalAccessException, InvocationTargetException, RestClientException, Exception {
-        log.trace("will invoke method to retrieve a Message: " + method);
-        ClientMessage clientMessage = (ClientMessage) method.invoke(null,
-                (Object[]) null);
+        LOG.trace("will invoke method to retrieve a Message: " + method);
+        ClientMessage clientMessage = (ClientMessage) method.invoke(null, (Object[]) null); 
+        
         if (clientMessage == null) {
-            log.trace("Message result is null, no sending needed.");
+            LOG.trace("Client message result is null, no sending needed.");
         } else {
         	clientMessage.setProjectId(getProjectId());
-        	log.debug("Saving message to the server: " + clientMessage);
-            RestUtil.saveClientMessage(clientMessage, getServerUrl(), getServerUsername(), getServerPassword());
+        	String url = getServerUrl() + "/services/api/messages/saveclientmessage";
+        	LOG.debug("Saving client message to the server: " + clientMessage);
+            RestUtil.putObjectInServer(clientMessage, url, getServerUsername(), getServerPassword());
         }
     }
+
+	protected Long getProjectId() {
+		Long projectId = null;
+		try {
+			String projectIdStr = properties.getProperty(M_TOR_PROJECT_ID);
+			projectId = new Long(projectIdStr);
+		} catch (Exception e) {
+			LOG.warn("could not read the projectId so message can not be send, no monitoring possible!", e);
+		}
+		LOG.debug("using projectId:" + projectId);
+		return projectId;
+	}
 
 	protected String getServerUrl() {
 		return properties.getProperty(M_TOR_SERVER_URL);
@@ -137,17 +152,5 @@ public class MessageServiceSender {
     protected String getServerPassword() {
         return properties.getProperty(M_TOR_SERVER_PASSWORD);
     }
-
-	protected Long getProjectId() {
-		Long projectId = null;
-		try {
-			String projectIdStr = properties.getProperty(M_TOR_PROJECT_ID);
-			projectId = new Long(projectIdStr);
-		} catch (Exception e) {
-			log.warn("could not read the projectId so message can not be send, no monitoring possible!", e);
-		}
-		log.debug("using projectId:" + projectId);
-		return projectId;
-	}
 
 }

@@ -5,14 +5,11 @@ import nl.bhit.mtor.client.annotation.MTorMessageProvider;
 import nl.bhit.mtor.client.model.ClientMessage;
 import nl.bhit.mtor.client.model.Status;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.log4j.Logger;
 
 @MTorMessageProvider
 public class FreeMemoryMTorMessageProvider {
-
-	
-    private static final Log log = LogFactory.getLog(FreeMemoryMTorMessageProvider.class);
+	private static final transient Logger LOG = Logger.getLogger(FreeMemoryMTorMessageProvider.class);
     
     public static long warnLimit = 150 /*MB*/ * 1024 /*KB x MB*/ * 1024 /*Byte x KB*/;
     public static long errorLimit = 50 /*MB*/ * 1024 /*KB x MB*/ * 1024 /*Byte x KB*/;
@@ -31,20 +28,20 @@ public class FreeMemoryMTorMessageProvider {
     public static ClientMessage getFreeMemoryMessage() {
     	ClientMessage message = new ClientMessage();
         final long free = Runtime.getRuntime().freeMemory();
-        log.trace("free memory is: " + free);
+        LOG.trace("free memory is: " + free);
         if (free < errorLimit) {
-            log.trace(ERROR_MSG);
+            LOG.trace(ERROR_MSG);
             return createMessage(message, ERROR_MSG, Status.ERROR);
         }
         if (free < warnLimit) {
-            log.trace(WARN_MSG);
+            LOG.trace(WARN_MSG);
             return createMessage(message, WARN_MSG, Status.WARN);
         }
         return null;
     }
 
     protected static ClientMessage createMessage(ClientMessage message, String errorMessage, Status status) {
-        log.warn(errorMessage);
+        LOG.warn(errorMessage);
         message.setContent(errorMessage);
         message.setStatus(status);
         return message;

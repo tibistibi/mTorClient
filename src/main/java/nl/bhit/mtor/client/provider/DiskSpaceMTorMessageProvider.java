@@ -7,8 +7,7 @@ import nl.bhit.mtor.client.annotation.MTorMessageProvider;
 import nl.bhit.mtor.client.model.ClientMessage;
 import nl.bhit.mtor.client.model.Status;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.log4j.Logger;
 
 /**
  * This message provider has one method which will give a soapMessage about the diskSpace.
@@ -17,8 +16,7 @@ import org.apache.commons.logging.LogFactory;
  */
 @MTorMessageProvider
 public class DiskSpaceMTorMessageProvider {
-
-    private final static Log log = LogFactory.getLog(DiskSpaceMTorMessageProvider.class);
+	private static final transient Logger LOG = Logger.getLogger(DiskSpaceMTorMessageProvider.class);
 
     private static long errorLimit = 5000000000L;
     private static long warnLimit = 10000000000L;
@@ -43,7 +41,7 @@ public class DiskSpaceMTorMessageProvider {
     }
 
     protected static ClientMessage createMessage(ClientMessage message, String errorMessage, Status status) {
-        log.warn(errorMessage);
+        LOG.warn(errorMessage);
         message.setContent(errorMessage);
         message.setStatus(status);
         return message;
@@ -52,7 +50,7 @@ public class DiskSpaceMTorMessageProvider {
     protected static long getFreeDiskSpace() {
         File tmp = new File("/");
         long free = tmp.getFreeSpace();
-        log.trace("free disk space is: " + free);
+        LOG.trace("free disk space is: " + free);
         return free;
     }
 

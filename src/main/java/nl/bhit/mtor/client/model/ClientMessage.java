@@ -14,7 +14,7 @@ public class ClientMessage implements Serializable {
     private Long projectId;
 
     public ClientMessage() {
-        // default cunstructor
+        // default constructor
     }
 
     public String getContent() {
