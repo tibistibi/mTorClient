@@ -19,6 +19,13 @@
 					<target>1.6</target>
 				</configuration>
 			</plugin>
+			<!-- Sonar -->
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>sonar-maven-plugin</artifactId>
+				<version>${sonarVersion}</version>
+			</plugin>
+			<!-- Sonar -->
 		</plugins>
 	</build>
 
@@ -69,4 +76,30 @@
 			<version>1.9.12</version>
 		</dependency>
 	</dependencies>
+
+	<profiles>
+		<profile>
+			<id>jan</id>
+			<properties>
+				<sonarVersion>1.0</sonarVersion>
+				<sonar.host>s.bhit.nl</sonar.host>
+				<sonar.login>jan</sonar.login>
+				<sonar.port>8181</sonar.port>
+				<sonar.jdbc.username>sonar</sonar.jdbc.username>
+				<sonar.jdbc.password>CHANGEME</sonar.jdbc.password>
+			</properties>
+		</profile>
+	</profiles>
+
+	<properties>
+		<!-- Sonar settings -->
+		<sonar.host>localhost</sonar.host>
+		<sonar.port>9000</sonar.port>
+		<sonar.host.url>http://${sonar.host}:${sonar.port}</sonar.host.url>
+		<sonar.db.name>sonar</sonar.db.name>
+		<sonar.db.port>3306</sonar.db.port>
+		<sonar.jdbc.url>jdbc:mysql://${sonar.host}:${sonar.db.port}/${sonar.db.name}?useUnicode=true&amp;amp;characterEncoding=utf8&amp;amp;rewriteBatchedStatements=true</sonar.jdbc.url>
+		<sonar.jdbc.username>sonar</sonar.jdbc.username>
+		<sonar.jdbc.driver>com.mysql.jdbc.Driver</sonar.jdbc.driver>
+	</properties>
 </project>
