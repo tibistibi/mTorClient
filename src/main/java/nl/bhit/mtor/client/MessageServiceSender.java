@@ -82,11 +82,7 @@ public class MessageServiceSender {
 	protected Set<String> getBasePackages() {
 		Set<String> result = new HashSet<String>();
 		result.add(defaultBasePackage);
-<<<<<<< HEAD
 		String[] pieces = StringUtils.split(getBasePackageFromProperty(), ",");
-=======
-		String[] pieces = StringUtils.split(getBasePackegeFromProperty(), ",");
->>>>>>> branch 'master' of https://github.com/tibistibi/mTorClient.git
 		if (pieces != null) {
 			for (int i = 0; i < pieces.length; i++) {
 				result.add(StringUtils.trim(pieces[i]));
