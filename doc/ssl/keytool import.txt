@@ -1,0 +1,31 @@
+ACCEPTING (TRUSTING) THE MTOR SELF SIGNED CERTIFICATE IN YOUR JAVA ENVIRONMENT 
+
+=======
+Windows
+=======
+1.
+Figure out your JRE path with the command:
+where java
+This will return for instance C:\java\jdk1.6.0_37\bin\java.exe
+The JRE path we are looking for in this case is C:\java\jdk1.6.0_37\jre
+
+2.
+Run this command to import the certificate to your keystore, password will be "changeit":
+keytool -import -file <certificate path>\mtor.bhit.nl.crt -keypass changeit -keystore <JRE path>\lib\security\cacerts -alias mtor.bhit.nl
+
+
+=====
+Linux
+=====
+
+1.
+Figure out your JRE path:
+ls -la /usr/bin/java | grep java
+If this points to /etc/alternatives/java, figure out where that symlink leads to:
+ls -la /etc/alternatives/java
+In most cases you will end up in the directory /usr/lib/jvm/java-6-oracle/jre/bin
+The JRE path we are looking for in this case is /usr/lib/jvm/java-6-oracle/jre
+
+2.
+Run this command to import the certificate to your keystore, password will be "changeit":
+sudo keytool -import -file <certificate path>/mtor.bhit.nl.crt -keypass changeit -keystore <JRE path>/lib/security/cacerts -alias mtor.bhit.nl
