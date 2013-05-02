@@ -83,7 +83,7 @@ public class MessageServiceSender {
             LOG.trace("Client message result is null, no sending needed.");
         } else {
         	clientMessage.setProjectId(properties.getProjectId());
-        	String url = properties.getServerUrl() + "/services/api/messages/saveclientmessage";
+        	String url = properties.getServerUrl() + properties.getServerUrlSaveclientmessage();
         	LOG.debug("Saving client message to the server: " + clientMessage);
             RestUtil.putObjectInServer(clientMessage, url, properties.getServerUsername(), properties.getServerPassword());
         }

@@ -30,7 +30,8 @@ public class RestUtil {
 	 * 			type of object you want to return in the Array List
 	 * @param url
 	 * 			url to the service to get JSON objects from
-	 * 			example: serverUrl + "/services/api/messages/" + userId + ".json";
+	 * 			example: https://mtor.bhit.nl/services/api/messages/1.json
+	 * 			where 1 is the user id
 	 * @param username
 	 * 			username for the basic authentication
 	 * @param password
@@ -76,7 +77,7 @@ public class RestUtil {
 	 * 			object you want to save
 	 * @param url
 	 * 			url to the service that receives the JSON objects
-	 * 			example: serverUrl + "/services/api/messages/saveclientmessage";
+	 * 			example: https://mtor.bhit.nl/services/api/messages/saveclientmessage
 	 * @param username
 	 * 			username for the basic authentication
 	 * @param password
@@ -97,7 +98,7 @@ public class RestUtil {
 			HttpEntity<String> entity = new HttpEntity<String>(jsonMessage, headers);
 			RestTemplate restTemplate = new RestTemplate();
 
-			LOG.trace("Trying to save object via REST PUT request...");
+			LOG.trace("Trying to save object via REST PUT request to URL: " + url);
 			int statusCode = restTemplate.exchange(url, HttpMethod.PUT, entity, null).getStatusCode().value();
 			if (statusCode != 204) {
 				LOG.warn("Saving object didn't return expected status code 204 (No Content), object probably not saved! Status code was " + statusCode);

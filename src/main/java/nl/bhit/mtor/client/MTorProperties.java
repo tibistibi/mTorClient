@@ -17,6 +17,7 @@ public class MTorProperties {
 	
 	private static final String MTOR_PROPERTYNAME_PROJECT_ID = "mTor.project.id";
     private static final String MTOR_PROPERTYNAME_SERVER_URL = "mTor.server.url";
+    private static final String MTOR_PROPERTYNAME_SERVER_URL_SAVECLIENTMESSAGE = "mTor.server.url.saveclientmessage";
     private static final String MTOR_PROPERTYNAME_SERVER_USERNAME = "mTor.server.username";
     private static final String MTOR_PROPERTYNAME_SERVER_PASSWORD = "mTor.server.password";
     private static final String MTOR_PROPERTYNAME_PACKAGES = "mTor.packages";
@@ -25,6 +26,7 @@ public class MTorProperties {
 	
 	private String projectId;
 	private String serverUrl;
+	private String serverUrlSaveclientmessage;
 	private String serverUsername;
 	private String serverPassword;
 	private String packages;
@@ -43,6 +45,7 @@ public class MTorProperties {
 			properties.load(this.getClass().getResourceAsStream("/" + propertiesFile));
 			projectId = properties.getProperty(MTOR_PROPERTYNAME_PROJECT_ID);
 			serverUrl = properties.getProperty(MTOR_PROPERTYNAME_SERVER_URL);
+			serverUrlSaveclientmessage = properties.getProperty(MTOR_PROPERTYNAME_SERVER_URL_SAVECLIENTMESSAGE);
 			serverUsername = properties.getProperty(MTOR_PROPERTYNAME_SERVER_USERNAME);
 			serverPassword = properties.getProperty(MTOR_PROPERTYNAME_SERVER_PASSWORD);
 			packages = properties.getProperty(MTOR_PROPERTYNAME_PACKAGES);
@@ -59,6 +62,9 @@ public class MTorProperties {
 		}
 		if (serverUrl == null) {
 			throw new MTorPropertiesException(errorPrefix + "mTor.server.url");
+		}
+		if (serverUrlSaveclientmessage == null) {
+			throw new MTorPropertiesException(errorPrefix + "mTor.server.url.saveclientmessage");
 		}
 		if (serverUsername == null) {
 			throw new MTorPropertiesException(errorPrefix + "mTor.server.username");
@@ -81,6 +87,10 @@ public class MTorProperties {
 
 	protected String getServerUrl() {
 		return serverUrl;
+	}
+	
+	protected String getServerUrlSaveclientmessage() {
+		return serverUrlSaveclientmessage;
 	}
     
     protected String getServerUsername() {
