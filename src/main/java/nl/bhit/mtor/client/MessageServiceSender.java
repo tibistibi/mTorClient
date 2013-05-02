@@ -2,17 +2,15 @@ package nl.bhit.mtor.client;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.HashSet;
-import java.util.Properties;
 import java.util.Set;
 
 import nl.bhit.mtor.client.annotation.MTorMessage;
 import nl.bhit.mtor.client.annotation.MTorMessageProvider;
+import nl.bhit.mtor.client.exceptions.MTorPropertiesException;
 import nl.bhit.mtor.client.model.ClientMessage;
 import nl.bhit.mtor.client.util.AnnotationUtil;
 import nl.bhit.mtor.client.util.RestUtil;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.web.client.RestClientException;
@@ -27,36 +25,14 @@ import org.springframework.web.client.RestClientException;
  */
 public class MessageServiceSender {
 	private static final transient Logger LOG = Logger.getLogger(MessageServiceSender.class);
-
-	private static final String M_TOR_PROJECT_ID = "mTor.project.id";
-    private static final String M_TOR_SERVER_URL = "mTor.server.url";
-    private static final String M_TOR_SERVER_USERNAME = "mTor.server.username";
-    private static final String M_TOR_SERVER_PASSWORD = "mTor.server.password";
-    private static final String M_TOR_PACKAGES = "mTor.packages";
-    private static final String M_TOR_PROPERTIES = "mTor.properties";
-    
-    Properties properties;
-    private final String defaultBasePackage = "nl.bhit.mtor";
+    private MTorProperties properties;
 
 	public MessageServiceSender() {
-		properties = new Properties();
-		if (!loadProperties(M_TOR_PROPERTIES)) {
-			LOG.debug("Will load default properties.");
-			loadProperties("default." + M_TOR_PROPERTIES);
-		}
-		LOG.trace("props loaded");
-	}
-
-	protected boolean loadProperties(String propertiesFile) {
-		boolean result = false;
 		try {
-			properties.load(this.getClass().getResourceAsStream("/" + propertiesFile));
-			result = true;
-		} catch (Exception e) {
-			LOG.warn("Properties could not be loaded. Make sure the properties file is on the path: " + M_TOR_PROPERTIES);
-			LOG.trace("stacktrace for above error:", e);
+			properties = new MTorProperties();
+		} catch (MTorPropertiesException e) {
+			LOG.warn("Properties of mTor client are not properly loaded. The application is probably not monitored! " + e.getMessage());
 		}
-		return result;
 	}
 
 	/**
@@ -68,31 +44,15 @@ public class MessageServiceSender {
 	public void sendMessages() {
 		LOG.trace("start sending message, will search for MTorMessageProvider classes");
 
-		for (String basePackage : getBasePackages()) {
+		for (String basePackage : properties.getPackages()) {
 			LOG.trace("sendMessages for base package: " + basePackage);
 			try {
 				sendMessages(basePackage);
 			} catch (Exception e) {
-				LOG.warn("there is an exception with sendMessages. The application is probably not monitorred! " + e.getMessage());
+				LOG.warn("there is an exception with sendMessages. The application is probably not monitored! " + e.getMessage());
 				LOG.trace("exception with which we do nothing. ", e);
 			}
 		}
-	}
-
-	protected Set<String> getBasePackages() {
-		Set<String> result = new HashSet<String>();
-		result.add(defaultBasePackage);
-		String[] pieces = StringUtils.split(getBasePackageFromProperty(), ",");
-		if (pieces != null) {
-			for (int i = 0; i < pieces.length; i++) {
-				result.add(StringUtils.trim(pieces[i]));
-			}
-		}
-		return result;
-	}
-
-	protected String getBasePackageFromProperty() {
-		return properties.getProperty(M_TOR_PACKAGES);
 	}
 
 	private void sendMessages(String basePackage) throws Exception {
@@ -122,35 +82,11 @@ public class MessageServiceSender {
         if (clientMessage == null) {
             LOG.trace("Client message result is null, no sending needed.");
         } else {
-        	clientMessage.setProjectId(getProjectId());
-        	String url = getServerUrl() + "/services/api/messages/saveclientmessage";
+        	clientMessage.setProjectId(properties.getProjectId());
+        	String url = properties.getServerUrl() + "/services/api/messages/saveclientmessage";
         	LOG.debug("Saving client message to the server: " + clientMessage);
-            RestUtil.putObjectInServer(clientMessage, url, getServerUsername(), getServerPassword());
+            RestUtil.putObjectInServer(clientMessage, url, properties.getServerUsername(), properties.getServerPassword());
         }
-    }
-
-	protected Long getProjectId() {
-		Long projectId = null;
-		try {
-			String projectIdStr = properties.getProperty(M_TOR_PROJECT_ID);
-			projectId = new Long(projectIdStr);
-		} catch (Exception e) {
-			LOG.warn("could not read the projectId so message can not be send, no monitoring possible!", e);
-		}
-		LOG.debug("using projectId:" + projectId);
-		return projectId;
-	}
-
-	protected String getServerUrl() {
-		return properties.getProperty(M_TOR_SERVER_URL);
-	}
-    
-    protected String getServerUsername() {
-        return properties.getProperty(M_TOR_SERVER_USERNAME);
-    }
-    
-    protected String getServerPassword() {
-        return properties.getProperty(M_TOR_SERVER_PASSWORD);
     }
 
 }
