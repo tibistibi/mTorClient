@@ -21,10 +21,6 @@ public final class AnnotationUtil {
 	private static final transient Logger LOG = Logger.getLogger(AnnotationUtil.class);
 	
     private static final ClassPathScanningCandidateComponentProvider PROVIDER = new ClassPathScanningCandidateComponentProvider(false);
-    
-    private AnnotationUtil() {
-    	//Helper class shouldn't has a public/default constructor.
-    }
 
     /**
      * will search for annotation of type searchForAnnotation within the basePackage
@@ -68,4 +64,7 @@ public final class AnnotationUtil {
         }
         return methods;
     }
+    
+	private AnnotationUtil() {
+	}
 }

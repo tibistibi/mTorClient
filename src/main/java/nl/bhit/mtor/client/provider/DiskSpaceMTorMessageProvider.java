@@ -2,11 +2,11 @@ package nl.bhit.mtor.client.provider;
 
 import java.io.File;
 
-import nl.bhit.mtor.client.MTorProperties;
 import nl.bhit.mtor.client.annotation.MTorMessage;
 import nl.bhit.mtor.client.annotation.MTorMessageProvider;
 import nl.bhit.mtor.client.model.ClientMessage;
 import nl.bhit.mtor.client.model.Status;
+import nl.bhit.mtor.client.properties.MTorProperties;
 
 import org.apache.log4j.Logger;
 
@@ -16,7 +16,7 @@ import org.apache.log4j.Logger;
  * @author tibi
  */
 @MTorMessageProvider
-public class DiskSpaceMTorMessageProvider {
+public final class DiskSpaceMTorMessageProvider {
 	private static final transient Logger LOG = Logger.getLogger(DiskSpaceMTorMessageProvider.class);
 
     private static long warnLimit = MTorProperties.getDiskspaceWarnlimit();
@@ -59,9 +59,6 @@ public class DiskSpaceMTorMessageProvider {
         return free;
     }
 
-    /*
-     * Getters & Setters
-     */
     public static long getErrorLimit() {
         return errorLimit;
     }
@@ -86,4 +83,7 @@ public class DiskSpaceMTorMessageProvider {
 		DiskSpaceMTorMessageProvider.path = path;
 	}
 
+    private DiskSpaceMTorMessageProvider() {
+    }
+    
 }

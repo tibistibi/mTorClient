@@ -1,10 +1,9 @@
-package nl.bhit.mtor.client;
+package nl.bhit.mtor.client.properties;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import nl.bhit.mtor.client.exceptions.MTorPropertiesException;
 
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
@@ -12,9 +11,8 @@ import org.apache.commons.configuration.reloading.FileChangedReloadingStrategy;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
-public class MTorProperties {
-	private static final transient Logger LOG = Logger
-			.getLogger(MTorProperties.class);
+public final class MTorProperties {
+	private static final transient Logger LOG = Logger.getLogger(MTorProperties.class);
 
 	private static final String FILENAME_DEFAULT = "mTor.default.properties";
 	private static final String FILENAME_OVERRIDE = "mTor.properties";
@@ -32,7 +30,9 @@ public class MTorProperties {
 	private static final String MTOR_PROPERTYNAME_FREEMEMORY_ERRORLIMIT_MB = "mTor.freememory.errorlimit.mb";
 
 	private static final String DEFAULT_PACKAGE = "nl.bhit.mtor";
-
+	private static final String COULD_NOT_FIND_PROPERTY_ERROR_PREFIX = "Could not read the limit number for property: ";
+	private static final int BYTE = 1024;
+	
 	private static PropertiesConfiguration defaultProperties;
 	private static PropertiesConfiguration overrideProperties;
 
@@ -40,7 +40,7 @@ public class MTorProperties {
 		try {
 			defaultProperties = new PropertiesConfiguration(FILENAME_DEFAULT);
 		} catch (ConfigurationException e) {
-			throw new MTorPropertiesException("Default properties could not be loaded!");
+			throw new MTorPropertiesException("Default properties could not be loaded!", e);
 		}
 		
 		try {
@@ -48,7 +48,7 @@ public class MTorProperties {
 			overrideProperties.setReloadingStrategy(new FileChangedReloadingStrategy());
 		} catch (ConfigurationException e) {
 			throw new MTorPropertiesException("Properties could not be loaded. Make sure the following properties file is on the path: "
-					+ FILENAME_OVERRIDE);
+					+ FILENAME_OVERRIDE, e);
 		}
 
 		checkRequiredPropertiesPresent();
@@ -113,9 +113,9 @@ public class MTorProperties {
 	public static Long getDiskspaceWarnlimit() {
 		Long limit = null;
 		try {
-			limit = GbToByte(new Long(getProperty(MTOR_PROPERTYNAME_DISKSPACE_WARNLIMIT_GB)));
+			limit = gbToByte(new Long(getProperty(MTOR_PROPERTYNAME_DISKSPACE_WARNLIMIT_GB)));
 		} catch (Exception e) {
-			LOG.warn("Could not read the limit number for property: " + MTOR_PROPERTYNAME_DISKSPACE_WARNLIMIT_GB);
+			LOG.warn(COULD_NOT_FIND_PROPERTY_ERROR_PREFIX + MTOR_PROPERTYNAME_DISKSPACE_WARNLIMIT_GB);
 		}
 		return limit;
 	}
@@ -123,9 +123,9 @@ public class MTorProperties {
 	public static Long getDiskspaceErrorlimit() {
 		Long limit = null;
 		try {
-			limit = GbToByte(new Long(getProperty(MTOR_PROPERTYNAME_DISKSPACE_ERRORLIMIT_GB)));
+			limit = gbToByte(new Long(getProperty(MTOR_PROPERTYNAME_DISKSPACE_ERRORLIMIT_GB)));
 		} catch (Exception e) {
-			LOG.warn("Could not read the limit number for property: " + MTOR_PROPERTYNAME_DISKSPACE_ERRORLIMIT_GB);
+			LOG.warn(COULD_NOT_FIND_PROPERTY_ERROR_PREFIX + MTOR_PROPERTYNAME_DISKSPACE_ERRORLIMIT_GB);
 		}
 		return limit;
 	}
@@ -133,9 +133,9 @@ public class MTorProperties {
 	public static Long getFreememoryWarnlimit() {
 		Long limit = null;
 		try {
-			limit = MbToByte(new Long(getProperty(MTOR_PROPERTYNAME_FREEMEMORY_WARNLIMIT_MB)));
+			limit = mbToByte(new Long(getProperty(MTOR_PROPERTYNAME_FREEMEMORY_WARNLIMIT_MB)));
 		} catch (Exception e) {
-			LOG.warn("Could not read the limit number for property: " + MTOR_PROPERTYNAME_FREEMEMORY_WARNLIMIT_MB);
+			LOG.warn(COULD_NOT_FIND_PROPERTY_ERROR_PREFIX + MTOR_PROPERTYNAME_FREEMEMORY_WARNLIMIT_MB);
 		}
 		return limit;
 	}
@@ -143,9 +143,9 @@ public class MTorProperties {
 	public static Long getFreememoryErrorlimit() {
 		Long limit = null;
 		try {
-			limit = MbToByte(new Long(getProperty(MTOR_PROPERTYNAME_FREEMEMORY_ERRORLIMIT_MB)));
+			limit = mbToByte(new Long(getProperty(MTOR_PROPERTYNAME_FREEMEMORY_ERRORLIMIT_MB)));
 		} catch (Exception e) {
-			LOG.warn("Could not read the limit number for property: " + MTOR_PROPERTYNAME_FREEMEMORY_ERRORLIMIT_MB);
+			LOG.warn(COULD_NOT_FIND_PROPERTY_ERROR_PREFIX + MTOR_PROPERTYNAME_FREEMEMORY_ERRORLIMIT_MB);
 		}
 		return limit;
 	}
@@ -186,11 +186,14 @@ public class MTorProperties {
 		return property;
 	}
 
-	private static Long GbToByte(Long Gb) {
-		return Gb * 1024 /*MB*/ * 1024 /*KB x MB*/ * 1024 /*Byte x KB*/;
+	private static Long gbToByte(Long gb) {
+		return gb * BYTE /* MB */ * BYTE /* KB */ * BYTE /* Byte */;
 	}
 	
-	private static Long MbToByte(Long Mb) {
-		return Mb * 1024 /*KB x MB*/ * 1024 /*Byte x KB*/;
+	private static Long mbToByte(Long mb) {
+		return mb * BYTE /* KB */ * BYTE /* Byte */;
+	}
+	
+	private MTorProperties() {
 	}
 }

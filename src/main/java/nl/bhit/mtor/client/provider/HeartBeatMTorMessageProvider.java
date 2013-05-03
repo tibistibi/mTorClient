@@ -10,7 +10,7 @@ import nl.bhit.mtor.client.model.Status;
  */
 
 @MTorMessageProvider
-public class HeartBeatMTorMessageProvider {
+public final class HeartBeatMTorMessageProvider {
 
     @MTorMessage
     public static ClientMessage getHeartBeatMessage() {
@@ -18,5 +18,8 @@ public class HeartBeatMTorMessageProvider {
         message.setContent("I am alive!");
         message.setStatus(Status.INFO);
         return message;
+    }
+    
+    private HeartBeatMTorMessageProvider() {
     }
 }

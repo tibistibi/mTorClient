@@ -6,6 +6,7 @@ import java.util.Set;
 import junit.framework.TestCase;
 
 import nl.bhit.mtor.client.model.ClientMessage;
+import nl.bhit.mtor.client.properties.MTorProperties;
 import nl.bhit.mtor.client.util.RestUtil;
 
 import org.apache.log4j.Logger;
