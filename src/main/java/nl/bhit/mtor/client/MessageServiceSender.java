@@ -25,11 +25,10 @@ import org.springframework.web.client.RestClientException;
  */
 public class MessageServiceSender {
 	private static final transient Logger LOG = Logger.getLogger(MessageServiceSender.class);
-    private MTorProperties properties;
 
 	public MessageServiceSender() {
 		try {
-			properties = new MTorProperties();
+			MTorProperties.initialize();
 		} catch (MTorPropertiesException e) {
 			LOG.warn("Properties of mTor client are not properly loaded. The application is probably not monitored! " + e.getMessage());
 		}
@@ -44,7 +43,7 @@ public class MessageServiceSender {
 	public void sendMessages() {
 		LOG.trace("start sending message, will search for MTorMessageProvider classes");
 
-		for (String basePackage : properties.getPackages()) {
+		for (String basePackage : MTorProperties.getPackages()) {
 			LOG.trace("sendMessages for base package: " + basePackage);
 			try {
 				sendMessages(basePackage);
@@ -55,37 +54,31 @@ public class MessageServiceSender {
 		}
 	}
 
-	private void sendMessages(String basePackage) throws Exception {
-		try {
-			final Set<BeanDefinition> candidates = AnnotationUtil.findProviders(MTorMessageProvider.class, basePackage);
-			for (BeanDefinition beanDefinition : candidates) {
-				sendMessageForProvider(beanDefinition);
-			}
-		} catch (Exception e) {
-			LOG.warn("There is a problem in sending the mTor messages via soap. Monitoring will not work", e);
-			throw e;
+	private void sendMessages(String basePackage) throws RestClientException, IllegalAccessException, InvocationTargetException {
+		final Set<BeanDefinition> candidates = AnnotationUtil.findProviders(MTorMessageProvider.class, basePackage);
+		for (BeanDefinition beanDefinition : candidates) {
+			sendMessageForProvider(beanDefinition);
 		}
 	}
 
-	protected void sendMessageForProvider(BeanDefinition beanDefinition) throws IllegalAccessException, InvocationTargetException, RestClientException,
-			Exception {
+	protected void sendMessageForProvider(BeanDefinition beanDefinition) throws IllegalAccessException, InvocationTargetException, RestClientException {
 		LOG.debug("found bean: " + beanDefinition);
 		for (Method method : AnnotationUtil.findMethods(MTorMessage.class, beanDefinition)) {
 			sendMessageForMethod(method);
 		}
 	}
 
-    protected void sendMessageForMethod(Method method) throws IllegalAccessException, InvocationTargetException, RestClientException, Exception {
+    protected void sendMessageForMethod(Method method) throws IllegalAccessException, InvocationTargetException, RestClientException {
         LOG.trace("will invoke method to retrieve a Message: " + method);
         ClientMessage clientMessage = (ClientMessage) method.invoke(null, (Object[]) null); 
         
         if (clientMessage == null) {
             LOG.trace("Client message result is null, no sending needed.");
         } else {
-        	clientMessage.setProjectId(properties.getProjectId());
-        	String url = properties.getServerUrl() + properties.getServerUrlSaveclientmessage();
+        	clientMessage.setProjectId(MTorProperties.getProjectId());
+        	String url = MTorProperties.getServerUrl() + MTorProperties.getServerUrlSaveclientmessage();
         	LOG.debug("Saving client message to the server: " + clientMessage);
-            RestUtil.putObjectInServer(clientMessage, url, properties.getServerUsername(), properties.getServerPassword());
+            RestUtil.putObjectInServer(clientMessage, url, MTorProperties.getServerUsername(), MTorProperties.getServerPassword());
         }
     }
 

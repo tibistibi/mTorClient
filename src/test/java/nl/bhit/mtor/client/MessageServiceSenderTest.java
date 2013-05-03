@@ -5,7 +5,6 @@ import java.util.Set;
 
 import junit.framework.TestCase;
 
-import nl.bhit.mtor.client.exceptions.MTorPropertiesException;
 import nl.bhit.mtor.client.model.ClientMessage;
 import nl.bhit.mtor.client.util.RestUtil;
 
@@ -33,17 +32,15 @@ public class MessageServiceSenderTest extends TestCase {
 
     @Test
     public void testGetBasePackages() {
-    	MTorProperties properties = getProperties();
-        Set<String> result = properties.getPackages();
+        Set<String> result = MTorProperties.getPackages();
         Assert.assertEquals(1, result.size());
     }
     
     @Test
     public void testGetMessages() {
-    	MTorProperties properties = getProperties();
-    	String url = properties.getServerUrl() + "/services/api/messages/-1.json";
+    	String url = MTorProperties.getServerUrl() + "/services/api/messages/-1.json";
     	try {
-			List<ClientMessage> clientMessages = RestUtil.getObjectsFromServer(ClientMessage[].class, url, properties.getServerUsername(), properties.getServerPassword());
+			List<ClientMessage> clientMessages = RestUtil.getObjectsFromServer(ClientMessage[].class, url, MTorProperties.getServerUsername(), MTorProperties.getServerPassword());
 			Assert.assertTrue(clientMessages.size() > 0);
 		} catch (RestClientException e) {
 			LOG.info("Getting textmessages test failed because of RestClientException: " + e.getMessage());
@@ -52,14 +49,4 @@ public class MessageServiceSenderTest extends TestCase {
 		}
     }
     
-    private MTorProperties getProperties() {
-    	MTorProperties properties = null;
-    	try {
-    		properties = new MTorProperties();
-			return properties;
-		} catch (MTorPropertiesException e) {
-			LOG.warn(e.getMessage());
-		}
-    	return properties;
-    }
 }

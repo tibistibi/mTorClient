@@ -39,7 +39,7 @@ public class RestUtil {
 	 * 
 	 */
 	public static <T> List<T> getObjectsFromServer(Class<T[]> objectType, String url, String username, String password)
-			throws RestClientException, Exception {
+			throws RestClientException {
 		
 		HttpHeaders headers = new HttpHeaders();
 		headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
@@ -84,7 +84,7 @@ public class RestUtil {
 	 * 			password for the basic authentication
 	 */
 	public static void putObjectInServer(Object object, String url, String username, String password) 
-			throws RestClientException, Exception {
+			throws RestClientException {
 		
 		ObjectMapper mapper = new ObjectMapper();
 		HttpHeaders headers = new HttpHeaders();
@@ -111,7 +111,6 @@ public class RestUtil {
 			throw e;
 		} catch (Exception e) {
 			LOG.warn("General exception while preparing REST connection: " + e.getMessage());
-			throw e;
 		}
 	}
 
