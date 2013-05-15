@@ -39,7 +39,7 @@ public class MessageServiceSenderTest extends TestCase {
     
     @Test
     public void testGetMessages() {
-    	String url = MTorProperties.getServerUrl() + "/services/api/messages/-1.json";
+    	String url = MTorProperties.getServerUrlBase() + "/services/api/messages/-1.json";
     	try {
 			List<ClientMessage> clientMessages = RestUtil.getObjectsFromServer(ClientMessage[].class, url, MTorProperties.getServerUsername(), MTorProperties.getServerPassword());
 			Assert.assertTrue(clientMessages.size() > 0);

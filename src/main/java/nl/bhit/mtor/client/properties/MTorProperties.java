@@ -18,11 +18,12 @@ public final class MTorProperties {
 	private static final String FILENAME_OVERRIDE = "mTor.properties";
 
 	private static final String MTOR_PROPERTYNAME_PROJECT_ID = "mTor.project.id";
-	private static final String MTOR_PROPERTYNAME_SERVER_URL = "mTor.server.url";
+	private static final String MTOR_PROPERTYNAME_SERVER_URL_BASE = "mTor.server.url";
 	private static final String MTOR_PROPERTYNAME_SERVER_URL_SAVECLIENTMESSAGE = "mTor.server.url.saveclientmessage";
 	private static final String MTOR_PROPERTYNAME_SERVER_USERNAME = "mTor.server.username";
 	private static final String MTOR_PROPERTYNAME_SERVER_PASSWORD = "mTor.server.password";
 	private static final String MTOR_PROPERTYNAME_PACKAGES = "mTor.packages";
+	private static final String MTOR_PROPERTYNAME_SCHEDULER_CRON = "mTor.scheduler.cron";
 	private static final String MTOR_PROPERTYNAME_DISKSPACE_PATH = "mTor.diskspace.path";
 	private static final String MTOR_PROPERTYNAME_DISKSPACE_WARNLIMIT_GB = "mTor.diskspace.warnlimit.gb";
 	private static final String MTOR_PROPERTYNAME_DISKSPACE_ERRORLIMIT_GB = "mTor.diskspace.errorlimit.gb";
@@ -58,22 +59,26 @@ public final class MTorProperties {
 			throws MTorPropertiesException {
 		String errorPrefix = "Required property not found: ";
 		if (getProperty(MTOR_PROPERTYNAME_PROJECT_ID) == null) {
-			throw new MTorPropertiesException(errorPrefix + "mTor.project.id");
+			throw new MTorPropertiesException(errorPrefix + MTOR_PROPERTYNAME_PROJECT_ID);
 		}
-		if (getProperty(MTOR_PROPERTYNAME_SERVER_URL) == null) {
-			throw new MTorPropertiesException(errorPrefix + "mTor.server.url");
+		if (getProperty(MTOR_PROPERTYNAME_SERVER_URL_BASE) == null) {
+			throw new MTorPropertiesException(errorPrefix + MTOR_PROPERTYNAME_SERVER_URL_BASE);
 		}
 		if (getProperty(MTOR_PROPERTYNAME_SERVER_URL_SAVECLIENTMESSAGE) == null) {
 			throw new MTorPropertiesException(errorPrefix
-					+ "mTor.server.url.saveclientmessage");
+					+ MTOR_PROPERTYNAME_SERVER_URL_SAVECLIENTMESSAGE);
 		}
 		if (getProperty(MTOR_PROPERTYNAME_SERVER_USERNAME) == null) {
 			throw new MTorPropertiesException(errorPrefix
-					+ "mTor.server.username");
+					+ MTOR_PROPERTYNAME_SERVER_USERNAME);
 		}
 		if (getProperty(MTOR_PROPERTYNAME_SERVER_PASSWORD) == null) {
 			throw new MTorPropertiesException(errorPrefix
-					+ "mTor.server.password");
+					+ MTOR_PROPERTYNAME_SERVER_PASSWORD);
+		}
+		if (getProperty(MTOR_PROPERTYNAME_SCHEDULER_CRON) == null) {
+			throw new MTorPropertiesException(errorPrefix
+					+ MTOR_PROPERTYNAME_SCHEDULER_CRON);
 		}
 	}
 
@@ -90,8 +95,8 @@ public final class MTorProperties {
 		return projectId;
 	}
 
-	public static String getServerUrl() {
-		return getProperty(MTOR_PROPERTYNAME_SERVER_URL);
+	public static String getServerUrlBase() {
+		return getProperty(MTOR_PROPERTYNAME_SERVER_URL_BASE);
 	}
 
 	public static String getServerUrlSaveclientmessage() {
@@ -161,6 +166,10 @@ public final class MTorProperties {
 			}
 		}
 		return result;
+	}
+	
+	public static String getSchedulerCron() {
+		return getProperty(MTOR_PROPERTYNAME_SCHEDULER_CRON);
 	}
 
 	private static String getProperty(String key) {

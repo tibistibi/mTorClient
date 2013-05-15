@@ -77,7 +77,7 @@ public class MessageServiceSender {
             LOG.trace("Client message result is null, no sending needed.");
         } else {
         	clientMessage.setProjectId(MTorProperties.getProjectId());
-        	String url = MTorProperties.getServerUrl() + MTorProperties.getServerUrlSaveclientmessage();
+        	String url = MTorProperties.getServerUrlBase() + MTorProperties.getServerUrlSaveclientmessage();
         	LOG.debug("Saving client message to the server: " + clientMessage);
             RestUtil.putObjectInServer(clientMessage, url, MTorProperties.getServerUsername(), MTorProperties.getServerPassword());
         }
