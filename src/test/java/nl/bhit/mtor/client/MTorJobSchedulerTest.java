@@ -2,65 +2,51 @@ package nl.bhit.mtor.client;
 
 import junit.framework.Assert;
 import nl.bhit.mtor.client.properties.MTorProperties;
+import nl.bhit.mtor.client.util.SchedulerUtil;
+
+import org.apache.log4j.Logger;
 import org.junit.Test;
+import org.quartz.SchedulerException;
 
 import static org.junit.Assert.*;
 import static org.hamcrest.CoreMatchers.*;
 
 public class MTorJobSchedulerTest {
+	private static final transient Logger LOG = Logger.getLogger(MTorJobSchedulerTest.class);
 	
-	MTorJobScheduler scheduler = new MTorJobScheduler();
+	SchedulerJob scheduler = new SchedulerJob();
 	
     @Test
     public void testScheduler() {
-    	scheduler.run();
     	
-    	Assert.assertEquals(MTorProperties.getSchedulerCron(), scheduler.getCurrentCronExpression());
-    	
-    	scheduler.run();
-    	
-    	Assert.assertEquals(MTorProperties.getSchedulerCron(), scheduler.getCurrentCronExpression());
-    	
-    	scheduler.rescheduleExistingJob("15 * * * * ?");
-    	
-    	assertThat(MTorProperties.getSchedulerCron(), not(equalTo(scheduler.getCurrentCronExpression())));
-    	
-    	scheduler.run();
-    	
-    	Assert.assertEquals(MTorProperties.getSchedulerCron(), scheduler.getCurrentCronExpression());
-    	
-    	scheduler.shutdown();
-    	
+    	try {
+			SchedulerUtil.initialize();
+			
+			scheduler.execute(null);
+			SchedulerUtil.listJobs();
+			
+			Assert.assertEquals(MTorProperties.getSchedulerCron(), SchedulerUtil.getCurrentCronExpression(MonitorJob.getJobName()));
+			
+			scheduler.execute(null);
+			SchedulerUtil.listJobs();
+			
+	    	Assert.assertEquals(MTorProperties.getSchedulerCron(), SchedulerUtil.getCurrentCronExpression(MonitorJob.getJobName()));
+	    	
+	    	SchedulerUtil.rescheduleExistingJob(MonitorJob.getJobName(), "15 * * * * ?");
+	    	SchedulerUtil.listJobs();
+	    	
+	    	assertThat(MTorProperties.getSchedulerCron(), not(equalTo(SchedulerUtil.getCurrentCronExpression(MonitorJob.getJobName()))));
+	    	
+	    	scheduler.execute(null);
+	    	SchedulerUtil.listJobs();
+	    	
+	    	Assert.assertEquals(MTorProperties.getSchedulerCron(), SchedulerUtil.getCurrentCronExpression(MonitorJob.getJobName()));
+			
+	    	SchedulerUtil.shutdown();
+	    	
+		} catch (SchedulerException e) {
+			LOG.warn("Problem while starting scheduler! " + e.getMessage());
+		}
     }
     
-    public void testChangingPropertiesFile() {
-    	scheduler.run();
-    	
-    	try {
-			Thread.sleep(10000L);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-    	
-    	scheduler.run();
-    	
-    	try {
-			Thread.sleep(20000L);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-    	
-    	scheduler.run();
-    	
-    	try {
-			Thread.sleep(1000000L);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-    	
-    	scheduler.shutdown();
-    }
 }

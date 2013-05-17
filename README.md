@@ -23,10 +23,12 @@ Using mTorClient
     <version>x.x</version>
   </dependency>
 
-3. Add the timer to the web.xml:
-classpath:/applicationContext-mTor-client-timer.xml
+3. Add the StartupListener for the client to the web.xml:
+   <listener>
+     <listener-class>nl.bhit.mtor.client.StartupListener</listener-class>
+   </listener>
 
-4. Add a file mTor.properties to your projects root wherein you change at least:
+4. Add a file mTor.properties to your projects root wherein you add exceptions to mTor.default.properties:
 mTor.server.username=admin
 mTor.server.password=admin
 mTor.project.id=-1

@@ -5,15 +5,15 @@ import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 
-public class MTorJob implements Job {
-	private static final transient Logger LOG = Logger.getLogger(MTorJob.class);
+public class MonitorJob implements Job {
+	private static final transient Logger LOG = Logger.getLogger(MonitorJob.class);
 
+	private static final String JOB_NAME = "mTorClientMonitor";
+	
     /**
      * Starts the MTor client processes
-     * Should be called from an scheduler
      */
-	public void execute(JobExecutionContext context)
-			throws JobExecutionException {
+	public void execute(JobExecutionContext context) throws JobExecutionException {
         LOG.debug("starting up the client process.");
         MessageServiceSender client = new MessageServiceSender();
         try {
@@ -23,4 +23,8 @@ public class MTorJob implements Job {
             throw new JobExecutionException(e);
         }
     }
+	
+	public static String getJobName() {
+		return JOB_NAME;
+	}
 }
